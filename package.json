@@ -8,5 +8,8 @@
     "start": "node server.js",
     "test": "node --test"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "todo-core": "github:kon-shou/orca-flow-ws-common#v0.1.0"
+  }
 }

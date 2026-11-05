@@ -14,12 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # 共通は非公開のリポジトリなので、読むだけのトークンで取り込む
-      - name: 共通を読むための git の設定
-        env:
-          COMMON_READ_TOKEN: ${{ secrets.COMMON_READ_TOKEN }}
-        run: |
-          git config --global url."https://x-access-token:${COMMON_READ_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
-          git config --global --add url."https://x-access-token:${COMMON_READ_TOKEN}@github.com/".insteadOf "git@github.com:"
+      # ロックファイルの共通は git+ssh で書かれるので、CI では https で読む（共通は公開）
+      - run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
       - run: npm ci
       - run: npm test

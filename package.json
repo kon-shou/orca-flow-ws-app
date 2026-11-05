@@ -1,0 +1,12 @@
+{
+  "name": "todo-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Todo の一覧・追加・完了の画面1枚と JSON の API",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED"
+}

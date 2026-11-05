@@ -1,6 +1,6 @@
 {
   "baseBranch": "main",
-  "idPrefix": "A",
+  "idPrefix": "C",
   "branchPrefix": "task/",
   "tasksDir": "docs/tasks",
   "reportsDir": "docs/tasks/reports",

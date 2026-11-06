@@ -158,6 +158,7 @@ test("画面の HTML に必要な部品がある", async () => {
   const html = await (await fetch(`${base}/`)).text();
   assert.match(html, /<script type="module" src="\/app\.js"><\/script>/);
   assert.doesNotMatch(html, /import\s*\{/);
+  assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/);
   assert.match(html, /<form id="add">[\s\S]*name="tags"[\s\S]*<\/form>/);
   assert.match(html, /id="f-status"/);
   assert.match(html, /id="f-tag"/);

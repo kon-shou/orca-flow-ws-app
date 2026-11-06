@@ -66,6 +66,7 @@ test("/app.js が配られ、HTML から読まれる", async () => {
   const html = await (await fetch(`${base}/`)).text();
   assert.match(html, /<script type="module" src="\/app\.js"><\/script>/);
   assert.doesNotMatch(html, /import\s*\{/);
+  assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/);
 });
 
 test("題の入力に共通の MAX_TITLE_LENGTH が maxlength で入る", async () => {
@@ -102,8 +103,8 @@ test("渡した時刻で作られ、要求ごとに呼ばれる", async () => {
 });
 
 test("日本の日付でその日より前の期限は400、同じ日は201", async () => {
-  // 日本時間 2030-01-02 09:00
-  await withClock(new Date("2030-01-02T00:00:00.000Z"), async ({ post }) => {
+  // 日本時間 2030-01-02 01:00（UTC ではまだ 2030-01-01）
+  await withClock(new Date("2030-01-01T16:00:00.000Z"), async ({ post }) => {
     const past = await post({ title: "x", dueDate: "2030-01-01" });
     assert.equal(past.status, 400);
     assert.match((await past.json()).error, /今日以降/);

@@ -29,7 +29,7 @@ test("追加して一覧に出て、完了にできる", async () => {
   const todo = await created.json();
   assert.equal(todo.title, "牛乳を買う");
 
-  const list = await (await fetch(`${base}/api/todos`)).json();
+  const list = (await (await fetch(`${base}/api/todos`)).json()).todos;
   assert.deepEqual(
     list.map((t) => t.title),
     ["牛乳を買う"],

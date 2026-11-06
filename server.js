@@ -91,6 +91,7 @@ async function load() {
 async function changed() {
   const parsed = parseFilter(readFilter());
   if (parsed.problems.length > 0) {
+    latest += 1;
     filterError.textContent = parsed.problems.join("。");
     return;
   }

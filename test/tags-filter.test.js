@@ -37,9 +37,17 @@ let ids = {};
 
 test("条件なしは全部と全部の件数を返す", async () => {
   assert.deepEqual((await list()).body, { todos: [], total: 0 });
-  ids.a = (await (await post({ title: "Buy Milk", tags: ["Home", "home", " Shop "] })).json()).id;
+  const ra = await post({ title: "Buy Milk", tags: ["Home", "home", " Shop "] });
+  assert.equal(ra.status, 201);
+  const ta = await ra.json();
+  assert.deepEqual(ta.tags, ["home", "shop"]);
+  ids.a = ta.id;
   ids.b = (await (await post({ title: "report", tags: ["work"] })).json()).id;
-  ids.c = (await (await post({ title: "plain" })).json()).id;
+  const rc = await post({ title: "plain" });
+  assert.equal(rc.status, 201);
+  const tc = await rc.json();
+  assert.equal(tc.tags, undefined);
+  ids.c = tc.id;
   await fetch(`${base}/api/todos/${ids.b}/done`, { method: "POST" });
   const { res, body } = await list();
   assert.equal(res.status, 200);
@@ -57,7 +65,9 @@ test("外れた tags の追加は 400", async () => {
   const res = await post({ title: "x", tags: ["a".repeat(21)] });
   assert.equal(res.status, 400);
   assert.match((await res.json()).error, /20文字/);
-  assert.equal((await post({ title: "x", tags: "home" })).status, 400);
+  const bad = await post({ title: "x", tags: "home" });
+  assert.equal(bad.status, 400);
+  assert.match((await bad.json()).error, /文字の並び/);
 });
 
 test("期限が正しくない追加は 400", async () => {
@@ -125,9 +135,15 @@ test("タグの付け直し", async () => {
 
 test("付け直しの誤り", async () => {
   assert.equal((await put(999, { tags: [] })).status, 404);
-  assert.equal((await put(ids.c, {})).status, 400);
-  assert.equal((await put(ids.c, { tags: "a" })).status, 400);
-  assert.equal((await put(ids.c, { tags: ["a".repeat(21)] })).status, 400);
+  for (const [body, reason] of [
+    [{}, /文字の並び/],
+    [{ tags: "a" }, /文字の並び/],
+    [{ tags: ["a".repeat(21)] }, /20文字/],
+  ]) {
+    const res = await put(ids.c, body);
+    assert.equal(res.status, 400, JSON.stringify(body));
+    assert.match((await res.json()).error, reason);
+  }
 });
 
 test("/todo-core.js は共通の入口のファイルを返す", async () => {
@@ -147,4 +163,14 @@ test("画面の HTML に必要な部品がある", async () => {
   assert.match(html, /id="f-tag"/);
   assert.match(html, /id="f-text"/);
   assert.match(html, /id="count"/);
+});
+
+test("画面が import する名前はすべて共通の公開名にある", async () => {
+  const html = await (await fetch(`${base}/`)).text();
+  const m = html.match(/import\s*\{([^}]*)\}\s*from\s*"\/todo-core\.js"/);
+  assert.ok(m);
+  const names = m[1].split(",").map((n) => n.trim()).filter(Boolean);
+  assert.ok(names.length > 0);
+  const core = await import("todo-core");
+  for (const name of names) assert.ok(name in core, name);
 });

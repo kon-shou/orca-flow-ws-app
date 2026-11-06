@@ -59,24 +59,26 @@ function readFilter() {
   return { status: fStatus.value, tag: fTag.value, text: fText.value };
 }
 
-function writeUrl() {
+function toQuery(f) {
   const params = new URLSearchParams();
-  if (fStatus.value !== "all") params.set("status", fStatus.value);
-  if (fTag.value.trim() !== "") params.set("tag", fTag.value);
-  if (fText.value.trim() !== "") params.set("text", fText.value);
-  const query = params.toString();
-  history.replaceState(null, "", location.pathname + (query === "" ? "" : "?" + query));
-}
-
-async function load() {
-  const params = new URLSearchParams();
-  const f = readFilter();
   if (f.status !== "all") params.set("status", f.status);
   if (f.tag.trim() !== "") params.set("tag", f.tag);
   if (f.text.trim() !== "") params.set("text", f.text);
   const query = params.toString();
-  const res = await fetch("/api/todos" + (query === "" ? "" : "?" + query));
+  return query === "" ? "" : "?" + query;
+}
+
+function writeUrl() {
+  history.replaceState(null, "", location.pathname + toQuery(readFilter()));
+}
+
+let latest = 0;
+async function load() {
+  latest += 1;
+  const mine = latest;
+  const res = await fetch("/api/todos" + toQuery(readFilter()));
   const data = await res.json();
+  if (mine !== latest) return;
   if (!res.ok) {
     filterError.textContent = data.error;
     return;

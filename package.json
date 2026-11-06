@@ -10,6 +10,6 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "todo-core": "github:kon-shou/orca-flow-ws-common#task/C02-tag-filter"
+    "todo-core": "github:kon-shou/orca-flow-ws-common#v0.2.0"
   }
 }

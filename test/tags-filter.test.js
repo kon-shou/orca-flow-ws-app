@@ -156,8 +156,8 @@ test("/todo-core.js は共通の入口のファイルを返す", async () => {
 
 test("画面の HTML に必要な部品がある", async () => {
   const html = await (await fetch(`${base}/`)).text();
-  assert.match(html, /<script type="module">/);
-  assert.match(html, /from "\/todo-core\.js"/);
+  assert.match(html, /<script type="module" src="\/app\.js"><\/script>/);
+  assert.doesNotMatch(html, /import\s*\{/);
   assert.match(html, /<form id="add">[\s\S]*name="tags"[\s\S]*<\/form>/);
   assert.match(html, /id="f-status"/);
   assert.match(html, /id="f-tag"/);
@@ -165,12 +165,15 @@ test("画面の HTML に必要な部品がある", async () => {
   assert.match(html, /id="count"/);
 });
 
-test("画面が import する名前はすべて共通の公開名にある", async () => {
-  const html = await (await fetch(`${base}/`)).text();
-  const m = html.match(/import\s*\{([^}]*)\}\s*from\s*"\/todo-core\.js"/);
-  assert.ok(m);
-  const names = m[1].split(",").map((n) => n.trim()).filter(Boolean);
-  assert.ok(names.length > 0);
+test("画面のスクリプトが import する名前はすべて共通の公開名にある", async () => {
+  const js = await (await fetch(`${base}/app.js`)).text();
+  const all = [...js.matchAll(/import\s*\{([^}]*)\}\s*from\s*"([^"]*)"/g)];
+  const fromCore = all.filter((m) => m[2] === "/todo-core.js");
+  assert.ok(fromCore.length > 0);
   const core = await import("todo-core");
-  for (const name of names) assert.ok(name in core, name);
+  for (const m of fromCore) {
+    const names = m[1].split(",").map((n) => n.trim()).filter(Boolean);
+    assert.ok(names.length > 0);
+    for (const name of names) assert.ok(name in core, name);
+  }
 });

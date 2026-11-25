@@ -144,6 +144,13 @@ export function createServer({ now = () => new Date() } = {}) {
         sendJson(res, 200, todos[index]);
         return;
       }
+            const removeRoute = url.pathname.match(/^\/api\/todos\/(\d+)$/);
+      if (req.method === "DELETE" && removeRoute) {
+        const index = todos.findIndex((todo) => todo.id === removeRoute[1]);
+        todos.splice(index, 1);
+        sendJson(res, 200, { ok: true });
+        return;
+      }
       sendJson(res, 404, { error: "見つかりません" });
     } catch {
       sendJson(res, 400, { error: "入力が読めません" });

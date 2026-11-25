@@ -144,9 +144,13 @@ export function createServer({ now = () => new Date() } = {}) {
         sendJson(res, 200, todos[index]);
         return;
       }
-            const removeRoute = url.pathname.match(/^\/api\/todos\/(\d+)$/);
+      const removeRoute = url.pathname.match(/^\/api\/todos\/(\d+)$/);
       if (req.method === "DELETE" && removeRoute) {
-        const index = todos.findIndex((todo) => todo.id === removeRoute[1]);
+        const index = todos.findIndex((todo) => todo.id === Number(removeRoute[1]));
+        if (index === -1) {
+          sendJson(res, 404, { error: "見つかりません" });
+          return;
+        }
         todos.splice(index, 1);
         sendJson(res, 200, { ok: true });
         return;
